@@ -34,18 +34,22 @@ class _NewExpenseState extends State<NewExpense> {
   }
 
   void _submitExpenseData() {
-    final enteredAmount = double.tryParse(_amountController
-        .text); // tryParse('Hello') => null, tryParse('1.12') => 1.12
+    final enteredAmount = double.tryParse(
+      _amountController.text.replaceAll(',', '.'),
+    );
+    final selectedDate = _selectedDate;
     final amountIsInvalid = enteredAmount == null || enteredAmount <= 0;
+
     if (_titleController.text.trim().isEmpty ||
         amountIsInvalid ||
-        _selectedDate == null) {
+        selectedDate == null) {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
           title: const Text('Invalid input'),
           content: const Text(
-              'Please make sure a valid title, amount, date and category was entered.'),
+            'Please make sure a valid title, amount, date and category was entered.',
+          ),
           actions: [
             TextButton(
               onPressed: () {
@@ -59,11 +63,12 @@ class _NewExpenseState extends State<NewExpense> {
       return;
     }
 
+    // koristimo lokalnu varijablu `selectedDate` koju smo provjerili iznad
     widget.onAddExpense(
       Expense(
-        title: _titleController.text,
-        amount: enteredAmount,
-        date: _selectedDate!,
+        title: _titleController.text.trim(),
+        amount: enteredAmount!,
+        date: selectedDate,
         category: _selectedCategory,
       ),
     );
@@ -86,9 +91,7 @@ class _NewExpenseState extends State<NewExpense> {
           TextField(
             controller: _titleController,
             maxLength: 50,
-            decoration: const InputDecoration(
-              label: Text('Title'),
-            ),
+            decoration: const InputDecoration(label: Text('Title')),
           ),
           Row(
             children: [
@@ -108,16 +111,19 @@ class _NewExpenseState extends State<NewExpense> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      _selectedDate == null
-                          ? 'No date selected'
-                          : formatter.format(_selectedDate!),
+                    Builder(
+                      builder: (ctx) {
+                        final date = _selectedDate;
+                        return Text(
+                          date == null
+                              ? 'No date selected'
+                              : formatter.format(date),
+                        );
+                      },
                     ),
                     IconButton(
                       onPressed: _presentDatePicker,
-                      icon: const Icon(
-                        Icons.calendar_month,
-                      ),
+                      icon: const Icon(Icons.calendar_month),
                     ),
                   ],
                 ),
@@ -133,9 +139,7 @@ class _NewExpenseState extends State<NewExpense> {
                     .map(
                       (category) => DropdownMenuItem(
                         value: category,
-                        child: Text(
-                          category.name.toUpperCase(),
-                        ),
+                        child: Text(category.name.toUpperCase()),
                       ),
                     )
                     .toList(),
