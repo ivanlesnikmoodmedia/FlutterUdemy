@@ -7,9 +7,8 @@ class Expenses extends StatefulWidget {
 
  @override
  State<StatefulWidget> createState() {
-   throw UnimplementedError();
    return _ExpensesState();
-   } 
+  }
 }
 
 class _ExpensesState extends State<Expenses> {
